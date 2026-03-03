@@ -1,42 +1,37 @@
 import gymnasium as gym
 import ale_py
 import numpy as np
-from copy import deepcopy
 
 gym.register_envs(ale_py)
-
 
 # NOEUD DE L'ARBRE MCTS
 
 class Node:
     def __init__(self, parent=None, action=None):
-        self.parent = parent        # Noeud parent
-        self.action = action        # Action qui a mené à ce noeud
-        self.children = []          # Noeuds enfants
-        self.wins = 0               # Nombre de victoires simulées
-        self.visits = 0             # Nombre de fois visité
+        self.parent = parent
+        self.action = action
+        self.children = []
+        self.wins = 0
+        self.visits = 0
 
     def is_fully_expanded(self, nb_actions):
         return len(self.children) == nb_actions
 
     def ucb1(self, exploration=1.41):
-        """Formule UCB1 : équilibre exploration et exploitation"""
         if self.visits == 0:
-            return float('inf')  # Priorité absolue aux noeuds jamais visités
+            return float('inf')
         return (self.wins / self.visits) + exploration * np.sqrt(
             np.log(self.parent.visits) / self.visits
         )
 
-# LES 4 ÉTAPES DE MCTS
+# LES 4 ÉTAPES MCTS
 
 def select(node):
-    """Descendre dans l'arbre en choisissant le meilleur UCB1"""
     while node.children:
         node = max(node.children, key=lambda n: n.ucb1())
     return node
 
 def expand(node, nb_actions):
-    """Ajouter un enfant non encore exploré"""
     actions_essayées = [c.action for c in node.children]
     actions_disponibles = [a for a in range(nb_actions) if a not in actions_essayées]
     action = np.random.choice(actions_disponibles)
@@ -44,61 +39,61 @@ def expand(node, nb_actions):
     node.children.append(enfant)
     return enfant
 
-def simulate(env_snapshot, action, nb_actions):
-    """Jouer aléatoirement depuis cet état jusqu'à la fin"""
-    env_copy = deepcopy(env_snapshot)
-    _, récompense, terminé, tronqué, _ = env_copy.step(action)
-    
-    while not terminé and not tronqué:
-        action_aléatoire = env_copy.action_space.sample()
-        _, récompense, terminé, tronqué, _ = env_copy.step(action_aléatoire)
-    
-    env_copy.close()
+def simulate(env_base, état_sauvegardé, nb_actions, max_coups=5):
+    """Profondeur limitée à 15 coups"""
+    env_base.restore_state(état_sauvegardé)
+    action = np.random.choice(nb_actions)
+    _, récompense, terminé, tronqué, _ = env_base.step(action)
+
+    coups = 0
+    while not terminé and not tronqué and coups < max_coups:
+        action_aléatoire = np.random.choice(nb_actions)
+        _, récompense, terminé, tronqué, _ = env_base.step(action_aléatoire)
+        coups += 1
+
     return récompense
 
 def backpropagate(node, résultat):
-    """Remonter le résultat jusqu'à la racine"""
     while node:
         node.visits += 1
         if résultat > 0:
             node.wins += 1
         node = node.parent
 
-
 # AGENT MCTS COMPLET
 
-def choisir_action_mcts(env, nb_simulations=50):
-    """Choisir la meilleure action via MCTS"""
+def choisir_action_mcts(env, nb_simulations=30):
     racine = Node()
     nb_actions = env.action_space.n
+    env_base = env.unwrapped
+    état_actuel = env_base.clone_state()
 
     for _ in range(nb_simulations):
-        # 1. Select
         noeud = select(racine)
 
-        # 2. Expand (si pas encore exploré complètement)
         if not noeud.is_fully_expanded(nb_actions):
             noeud = expand(noeud, nb_actions)
 
-        # 3. Simulate
-        résultat = simulate(env, noeud.action, nb_actions)
-
-        # 4. Backpropagate
+        résultat = simulate(env_base, état_actuel, nb_actions)
         backpropagate(noeud, résultat)
 
-    # Choisir l'action la plus visitée (la plus fiable)
+    env_base.restore_state(état_actuel)
+
+    if not racine.children:
+        return env.action_space.sample()
+
     meilleur = max(racine.children, key=lambda n: n.visits)
     return meilleur.action
 
-# JOUER DES PARTIES AVEC MCTS
+# JOUER DES PARTIES
 
-env = gym.make("ALE/Othello-v5", render_mode="human")
+env = gym.make("ALE/Othello-v5")
 
-nb_parties = 5  # Moins que baseline car MCTS est plus lent
+nb_parties = 5
+nb_simulations = 10
 scores = []
-nb_simulations = 50  # Nombre de simulations par coup
 
-print(f"MCTS avec {nb_simulations} simulations par coup")
+print(f"MCTS avec {nb_simulations} simulations par coup | Profondeur : 15")
 print("=" * 40)
 
 for partie in range(nb_parties):
@@ -111,16 +106,16 @@ for partie in range(nb_parties):
         action = choisir_action_mcts(env, nb_simulations)
         observation, récompense, terminé, tronqué, info = env.step(action)
         score_total += récompense
-        nb_coups += 1
 
         if tronqué:
             terminé = True
 
     scores.append(score_total)
-    print(f"Partie {partie + 1} — Score : {score_total} — Coups joués : {nb_coups}")
+    print(f"Partie {partie+1} — Score : {score_total} — Coups : {nb_coups}")
+    print("-" * 40)
 
-print(f"\nScore moyen MCTS  : {np.mean(scores):.2f}")
-print(f"Score moyen baseline (aléatoire) : -10.60")
-print(f"Amélioration : {np.mean(scores) - (-10.60):.2f} points")
+print(f"\nScore moyen MCTS     : {np.mean(scores):.2f}")
+print(f"Score moyen baseline : -10.60")
+print(f"Amélioration         : {np.mean(scores) - (-10.60):.2f} points")
 
 env.close()
