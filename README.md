@@ -76,6 +76,26 @@ Une fenêtre s'ouvrira avec le jeu Othello. L'agent jouera 10 parties au hasard.
 - Le score moyen — notre référence de comparaison pour MCTS et DQN
 - Le score minimum et maximum
 
+## Exécution — Phase 2 (MCTS)
+
+### Pourquoi deux fichiers MCTS ?
+
+La première tentative (`phase2_mcts.py`) utilisait `clone_state/restore_state` de ALE directement sur l'environnement Atari. Cette approche s'est révélée non viable pour deux raisons :
+- **Performance** : plus d'une heure par partie même avec 10 simulations
+- **Résultats corrompus** : score moyen de -21.20, pire que l'agent aléatoire (-10.60), car `restore_state` ne restaure pas correctement l'état dans ce contexte
+
+La solution adoptée (`phase2_mcts_othello.py`) réimplémente Othello directement en Python pur, ce qui est une pratique courante dans la littérature académique sur MCTS. Les simulations opèrent sur des matrices NumPy sans surcharge ALE, rendant l'exécution environ 100x plus rapide.
+
+### Lancer MCTS
+
+```bash
+python phase2_mcts_othello.py
+```
+
+Le script teste automatiquement trois configurations (50, 100, 200 simulations) sur 10 parties chacune contre un agent aléatoire.
+
+---
+
 
 ## Notes techniques
 
