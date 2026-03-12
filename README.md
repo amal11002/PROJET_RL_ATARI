@@ -109,4 +109,122 @@ Le script teste automatiquement trois configurations (50, 100, 200 simulations) 
 
 - **`(venv)` n'apparaît pas :** relance la commande d'activation `venv\Scripts\activate`
 - **Erreur `No module named gymnasium` :** vérifie que l'environnement virtuel est activé avant d'installer
+
 - **La fenêtre du jeu ne s'ouvre pas :** assure-toi d'utiliser `render_mode='human'` dans le script
+
+# Phase 3 — Deep Q-Learning (DQN)
+
+### Agent intelligent avec apprentissage profond — 8INF974
+
+---
+
+## Description
+
+La Phase 3 du projet implémente un agent d’apprentissage par renforcement basé sur **Deep Q-Learning (DQN)** pour apprendre à jouer au jeu **Othello**.
+
+Contrairement à l’approche **Monte Carlo Tree Search (MCTS)** utilisée en Phase 2, le DQN utilise un **réseau de neurones profond** pour approximer la fonction de valeur des actions.
+
+L’agent apprend en jouant plusieurs parties contre un adversaire aléatoire et améliore progressivement sa stratégie.
+
+---
+
+## Principe du Deep Q-Learning
+
+Le Deep Q-Learning combine :
+
+* **Q-Learning** (apprentissage par renforcement)
+* **Deep Learning** (réseaux de neurones)
+
+Le réseau prend en entrée l’état du plateau et prédit la **valeur Q pour chaque action possible**.
+
+Une expérience est représentée sous la forme :
+
+```text
+(state, action, reward, next_state, done)
+```
+
+Ces expériences sont stockées dans une mémoire appelée **Replay Buffer** afin de stabiliser l’apprentissage.
+
+## Architecture du réseau de neurones
+
+Entrée :
+
+* plateau **8 × 8**
+* transformé en vecteur de **64 valeurs**
+
+Architecture :
+
+```
+Input layer : 64
+Hidden layer : 128 neurones (ReLU)
+Hidden layer : 128 neurones (ReLU)
+Output layer : 64 neurones
+```
+
+Chaque sortie correspond à la **valeur Q d’une action possible sur le plateau**.
+
+---
+
+## Fonction de récompense
+
+La récompense est attribuée uniquement à la fin de la partie :
+
+```
+Victoire  : +1
+Défaite   : -1
+Égalité   : 0
+```
+
+Pendant la partie :
+
+```
+Reward = 0
+```
+
+---
+
+## Paramètres d'entraînement
+
+```
+Episodes : 1000
+Batch size : 64
+Gamma : 0.99
+Learning rate : 0.001
+
+Epsilon initial : 1.0
+Epsilon minimum : 0.05
+Epsilon decay : 0.999
+```
+
+L’agent utilise une stratégie **ε-greedy** :
+
+* avec probabilité **ε** → action aléatoire
+* sinon → action avec la meilleure valeur Q
+
+---
+
+## Lancer l'entraînement
+
+Exécuter la commande suivante :
+
+```bash
+python phase3_dqn_othello.py
+```
+
+Le programme entraîne l’agent sur plusieurs parties.
+
+Pendant l'exécution, le terminal affiche :
+
+* numéro de l’épisode
+* récompense finale
+* nombre de coups joués
+
+Exemple :
+
+```
+Episode 10 Reward: -1 Moves: 30
+Episode 11 Reward: 1 Moves: 31
+Episode 12 Reward: 0 Moves: 30
+```
+
+
