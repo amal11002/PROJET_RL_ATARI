@@ -32,7 +32,7 @@ venv\Scripts\activate
 ###  Installer les dépendances
 
 ```bash
-pip install gymnasium[atari] ale-py numpy
+pip install torch gymnasium[atari] ale-py numpy
 ```
 
 Cette commande installe :
@@ -40,6 +40,7 @@ Cette commande installe :
 - `gymnasium` — l'interface principale pour interagir avec les jeux Atari
 - `ale-py` — le moteur Arcade Learning Environment qui contient les ROMs
 - `numpy` — librairie de calcul numérique
+- `PyTorch` — implémentation du réseau de neurones
 
 ---
 
@@ -216,13 +217,6 @@ Pendant l'exécution, le terminal affiche :
 * récompense finale
 * nombre de coups joués
 
-Exemple :
-
-```
-Episode 10 Reward: -1 Moves: 30
-Episode 11 Reward: 1 Moves: 31
-Episode 12 Reward: 0 Moves: 30
-```
 
 
 
