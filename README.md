@@ -112,13 +112,10 @@ Le script teste automatiquement trois configurations (50, 100, 200 simulations) 
 
 - **La fenêtre du jeu ne s'ouvre pas :** assure-toi d'utiliser `render_mode='human'` dans le script
 
-# Phase 3 — Deep Q-Learning (DQN)
-
-### Agent intelligent avec apprentissage profond — 8INF974
-
+## Exécution — Phase 3 (DQN)
 ---
 
-## Description
+### Description
 
 La Phase 3 du projet implémente un agent d’apprentissage par renforcement basé sur **Deep Q-Learning (DQN)** pour apprendre à jouer au jeu **Othello**.
 
@@ -128,7 +125,7 @@ L’agent apprend en jouant plusieurs parties contre un adversaire aléatoire et
 
 ---
 
-## Principe du Deep Q-Learning
+### Principe du Deep Q-Learning
 
 Le Deep Q-Learning combine :
 
@@ -145,7 +142,7 @@ Une expérience est représentée sous la forme :
 
 Ces expériences sont stockées dans une mémoire appelée **Replay Buffer** afin de stabiliser l’apprentissage.
 
-## Architecture du réseau de neurones
+### Architecture du réseau de neurones
 
 Entrée :
 
@@ -165,7 +162,7 @@ Chaque sortie correspond à la **valeur Q d’une action possible sur le plateau
 
 ---
 
-## Fonction de récompense
+### Fonction de récompense
 
 La récompense est attribuée uniquement à la fin de la partie :
 
@@ -183,7 +180,7 @@ Reward = 0
 
 ---
 
-## Paramètres d'entraînement
+### Paramètres d'entraînement
 
 ```
 Episodes : 1000
@@ -203,7 +200,7 @@ L’agent utilise une stratégie **ε-greedy** :
 
 ---
 
-## Lancer l'entraînement
+### Lancer l'entraînement
 
 Exécuter la commande suivante :
 
@@ -226,5 +223,6 @@ Episode 10 Reward: -1 Moves: 30
 Episode 11 Reward: 1 Moves: 31
 Episode 12 Reward: 0 Moves: 30
 ```
+
 
 
